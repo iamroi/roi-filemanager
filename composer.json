@@ -1,0 +1,49 @@
+{
+    "name": "iamroi/roi-filemanager",
+    "type": "project",
+    "description": "Framework agnostic file manager for PHP.",
+    "keywords": [
+        "file manager",
+        "media manger"
+    ],
+    "homepage": "http://iamrja.com/roi-file-manager",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Raja Munisamy",
+            "email": "mrajasays@gmail.com",
+            "homepage": "http://iamrja.com"
+        }
+    ],
+    "require": {
+        "php": "^7.1",
+        "ikkez/f3-schema-builder": "dev-master",
+        "league/flysystem": "^1.0.8",
+        "rakit/validation": "^1.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7.0"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "extra": {
+
+    },
+    "autoload": {
+        "psr-4": {
+            "Iamroi\\FileManager\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Iamroi\\FileManager\\Tests\\": "tests/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "scripts": {
+    }
+}
