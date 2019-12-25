@@ -8,8 +8,10 @@ All files and folder entries are recorded in the local database so that all of t
 # Usage
 
 ## Initialize
-    $filemanager = new \Iamroi\RoiFilemanager;
-
+    Use \Iamroi\RoiFilemanager;
+    
+    ...
+        
 	$config['db'] = [  
 	  'host' => 'DB_HOST',  
 	  'database' => 'DB_DATABASE',  

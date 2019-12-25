@@ -73,21 +73,28 @@ class PdoPathAdapter extends AbstractAdapter
         if ($config === null) {
             $config = new Config;
         }
-        $defaultTable = 'file_manager';
-        $config->setFallback(new Config([
-            'table'            => $defaultTable,
-            'temp_dir'         => sys_get_temp_dir(),
-        ]));
+
         $this->config = $config;
+
+//        $defaultTable = 'file_manager';
+
+        $this->config->set('table', $this->config->get('table', 'file_manager'));
+        $this->config->set('temp_dir', $this->config->get('temp_dir', sys_get_temp_dir()));
+
+//        $config->setFallback(new Config([
+//            'table'            => $defaultTable,
+//            'temp_dir'         => sys_get_temp_dir(),
+//        ]));
+
 
 //        $this->pathPrefix = '/';
         $this->root = $root;
 
-        $table = trim($this->config->get('table'));
-        if ($table == '') {
-            $table = $defaultTable;
-        }
-        $this->pathTable  = $table;
+//        $table = trim($this->config->get('table'));
+//        if ($table == '') {
+//            $table = $defaultTable;
+//        }
+        $this->pathTable  = trim($this->config->get('table'));
     }
 
     public function setSearch($search)
@@ -172,7 +179,7 @@ class PdoPathAdapter extends AbstractAdapter
 //            'path'          => $this->pathPrefix ? $this->applyPathPrefix($path) : $path, //$path, //$this->applyPathPrefix($path),
             'path'          => $path, //$path, //$this->applyPathPrefix($path),
             'type'          => 'file',
-            'mimetype'      => Util::guessMimeType($absPath, $contents),
+            'mime_type'      => Util::guessMimeType($absPath, $contents),
             'visibility'    => $config->get('visibility', AdapterInterface::VISIBILITY_PUBLIC),
             'size'          => filesize($absPath),
         ];
@@ -210,7 +217,7 @@ class PdoPathAdapter extends AbstractAdapter
             'file',
             $data['path'],
             $data['visibility'],
-            $data['mimetype'],
+            $data['mime_type'],
             $data['size'],
             $expiry,
             $meta
@@ -265,9 +272,9 @@ class PdoPathAdapter extends AbstractAdapter
             return false;
         }
 
-        $searchKeys       = ['size', 'mimetype'];
+        $searchKeys       = ['size', 'mime_type'];
         $data['size']     = filesize($tmpFilename);
-        $data['mimetype'] = Util::guessMimeType($tmpFilename, $contents);
+        $data['mime_type'] = Util::guessMimeType($tmpFilename, $contents);
         if ($config->has('expiry')) {
             $data['expiry'] = $config->get('expiry');
             $searchKeys[] = 'expiry';
@@ -348,7 +355,7 @@ class PdoPathAdapter extends AbstractAdapter
             $data['type'],
             $newData['path'],
             $data['visibility'],
-            $data['mimetype'],
+            $data['mime_type'],
             $data['size'],
             isset($data['expiry']) ? $data['expiry'] : null,
             isset($data['meta']) ? $data['meta'] : null
@@ -597,7 +604,7 @@ class PdoPathAdapter extends AbstractAdapter
      */
     public function getMimetype($path)
     {
-        return $this->getFileMetadataValue($path, 'mimetype');
+        return $this->getFileMetadataValue($path, 'mime_type');
     }
 
     /**
@@ -646,26 +653,38 @@ class PdoPathAdapter extends AbstractAdapter
             return false;
         }
 
-        $meta = [
-            'path_id'   => $data['path_id'],
-            'type'      => $data['type'],
-            'path'      => $data['path'],
-            'timestamp' => strtotime($data['updated_at'])
-        ];
-        if ($data['type'] == 'file') {
-            $meta['mimetype']   = $data['mimetype'];
-            $meta['size']       = $data['size'];
-            $meta['visibility'] = $data['visibility'];
-            if (isset($data['expiry'])) {
-                $meta['expiry'] = $data['expiry'];
-            }
-        }
+        $pathInfo = pathinfo($data['path']);
 
+        $data['timestamp'] = strtotime($data['updated_at']);
+        $data['filename'] = $pathInfo['filename'];
+        $data['extension'] = isset($pathInfo['extension']) ? $pathInfo['extension'] : '';
+        $data['basename'] = $pathInfo['basename'];
+
+//        'dirname' => $pathInfo['dirname'] === '.' || $pathInfo['dirname'] === '..' ? '' : $pathInfo['dirname'],
+//            'basename' => $pathInfo['basename'],
+//            'extension' => $pathInfo['extension'] ?? '',
+//            'filename' => $pathInfo['filename'],
+
+//        $meta = [
+//            'path_id'   => $data['path_id'],
+//            'type'      => $data['type'],
+//            'path'      => $data['path'],
+//            'timestamp' => strtotime($data['updated_at'])
+//        ];
+//        if ($data['type'] == 'file') {
+//            $meta['mime_type']   = $data['mime_type'];
+//            $meta['size']       = $data['size'];
+//            $meta['visibility'] = $data['visibility'];
+//            if (isset($data['expiry'])) {
+//                $meta['expiry'] = $data['expiry'];
+//            }
+//        }
+//
         if (isset($data['meta'])) {
-            $meta['meta'] = json_decode($data['meta'], true);
+            $data['meta'] = json_decode($data['meta'], true);
         }
 
-        return $meta;
+        return $data;
     }
 
     /**
@@ -721,6 +740,7 @@ class PdoPathAdapter extends AbstractAdapter
     ) {
 //        $dirname = $this->getCleanedDirname($path);
 //        $dirname = $dirname === '.' || $dirname === '..' ? '' : $dirname;
+
         $data = [
             'type'          => $type == 'dir' ? 'dir' : 'file',
 //            'dirname'        => $this->getParentDirectoryUri($path),
@@ -729,14 +749,43 @@ class PdoPathAdapter extends AbstractAdapter
             'filename'        => basename($path),
             'path'          => $path,
             'visibility'    => $visibility,
-            'mimetype'      => $mimeType,
+            'mime_type'      => $mimeType,
             'size'          => $size,
             'created_at'    => date('Y-m-d H:i:s'),
             'updated_at'    => date('Y-m-d H:i:s'),
         ];
+
+//        dump($data);
+//        dump($type);
+//        dd($this->config);
+
+        // todo refactor
+        if($this->config->get('createThumb') && $type == 'file') {
+            $absPath = implode($this->pathSeparator, array_filter([$this->config->get('fileManagerRoot', ''), $path], 'strlen'));
+            $absPathInfo = pathinfo($absPath);
+            $pathInfo = pathinfo($path);
+            $extension = isset($absPathInfo['extension']) ? '.' . $absPathInfo['extension'] : '';
+
+            $thumbName = $pathInfo['filename'] . '-' . $this->config->get('thumbWidth', 200) . 'x' . $this->config->get('thumbHeight', 200) . $extension;
+//            $thumbPath = implode('/', array_filter([$this->config->get('fileManagerRoot', ''), $pathInfo['dirname'], $thumbName], 'strlen'));
+//            $thumbPath = $absPathInfo['filename'] . '-' . $this->config->get('thumbWidth', 200) . 'x' . $this->config->get('thumbHeight', 200) . $extension;
+            $thumbPath = implode($this->pathSeparator, array_filter([$this->sanitizeDirname($path), $thumbName], 'strlen'));
+            $thumbAbsPath = implode($this->pathSeparator, array_filter([$absPathInfo['dirname'], $thumbName], 'strlen'));
+
+//            dump($pathInfo['dirname']);
+//            dump($this->sanitizeDirname($path));
+//            dd($thumbPath);
+//            dd($pathInfo);
+//            dd($thumbAbsPath);
+            if(file_exists($thumbAbsPath)) {
+                $data['thumb_path'] = $thumbPath;
+            }
+        }
+
         if ($expiry !== null) {
             $data['expiry'] = $expiry;
         }
+
         if ($additional !== null) {
             $data['meta'] = json_encode($additional);
         }

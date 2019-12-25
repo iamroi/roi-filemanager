@@ -18,6 +18,7 @@
     "require": {
         "php": "^7.1",
         "ikkez/f3-schema-builder": "dev-master",
+        "intervention/image": "^2.5",
         "league/flysystem": "^1.0.8",
         "rakit/validation": "^1.2"
     },

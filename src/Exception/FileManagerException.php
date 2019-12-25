@@ -1,6 +1,6 @@
 <?php
 
-namespace Iamroi\FileManager\Exception;
+namespace Iamroi\RoiFileManager\Exception;
 
 class FileManagerException extends \Exception
 {

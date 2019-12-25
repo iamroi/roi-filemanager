@@ -1,6 +1,6 @@
 <?php
 
-namespace Iamroi\FileManager;
+namespace Iamroi\RoiFileManager;
 
 use League\Flysystem\Util;
 
@@ -25,31 +25,48 @@ class Helpers
         // Sanitize the file name before we begin processing.
         $filename = self::sanitizeFileName( $filename );
 
-        $number = '';
+        $file  = pathinfo( $filename);
 
-        // Separate the filename into a name and extension.
-        $ext  = pathinfo( $filename, PATHINFO_EXTENSION );
-//    $name = pathinfo( $filename, PATHINFO_BASENAME );
-        if ( $ext ) {
-            $ext = '.' . $ext;
+        $filenameNoExt = $file['filename'];
+
+//        $ext  = pathinfo( $filename, PATHINFO_EXTENSION );
+
+        $number = 1;
+        while(file_exists($dir. "/". $filenameNoExt.".".$file['extension'])){
+            $filenameNoExt = $file['filename']."-$number";
+            $number++;
         }
 
-        // Edge case: if file is named '.ext', treat as an empty name.
-//        if ( $name === $ext ) {
-//            $name = '';
+        return $filenameNoExt.".".$file['extension'];
+
+
+
+//        $number = '';
+//
+//        // Separate the filename into a name and extension.
+//        $ext  = pathinfo( $filename, PATHINFO_EXTENSION );
+////    $name = pathinfo( $filename, PATHINFO_BASENAME );
+//        if ( $ext ) {
+//            $ext = '.' . $ext;
 //        }
-
-        while ( file_exists( $dir . "/$filename" ) ) {
-            $new_number = (int) $number + 1;
-            if ( '' == "$number$ext" ) {
-                $filename = "$filename-" . $new_number;
-            } else {
-                $filename = str_replace( array( "-$number$ext", "$number$ext" ), '-' . $new_number . $ext, $filename );
-            }
-            $number = $new_number;
-        }
-
-        return $filename;
+//
+//        // Edge case: if file is named '.ext', treat as an empty name.
+////        if ( $name === $ext ) {
+////            $name = '';
+////        }
+//
+////        $pivotFilename = $filename;
+//        while ( file_exists( $dir . "/$filename" ) ) {
+//            $new_number = (int) $number + 1;
+//            if ( '' == "$number$ext" ) {
+//                $filename = "$filename-" . $new_number;
+//            } else {
+//                $filename = str_replace( array( "-$number$ext", "$number$ext" ), '-' . $new_number . $ext, $filename );
+//            }
+//            $number = $new_number;
+//        }
+//
+//        return $filename;
     }
 
     public static function getFileManagerItemUrl($base, $fileManagerDir, $uri)
@@ -84,6 +101,35 @@ class Helpers
         return isset($_FILES[$uploadName]) && is_array($_FILES[$uploadName]['name']);
     }
 
+    public static function toAbsolutePath($path, $rootFolder = '/')
+    {
+        if($rootFolder == '' || substr($path, 0, strlen($rootFolder)) === $rootFolder) {
+            // already absolute
+            return $path;
+        }
+
+        $path = implode('/', array_filter([$rootFolder, $path], 'strlen'));
+
+        return $path;
+    }
+
+    public static function toRelativePath($path, $rootFolder = '/')
+    {
+        if($rootFolder == '') {
+            // already relative
+            return $path;
+        }
+
+        $pos = strpos($path, $rootFolder);
+        if ($pos !== false) {
+            $path = substr_replace($path, '', $pos, strlen($rootFolder));
+        }
+
+        $path = rtrim(ltrim($path, '\\/'), '\\/');
+
+        return $path;
+    }
+
     /**
      * Function: sanitize
      * Returns a sanitized string, typically for URLs.
@@ -93,7 +139,7 @@ class Helpers
      *     $force_lowercase - Force the string to lowercase?
      *     $removeAlphaNumeric - If set to *true*, will remove all non-alphanumeric characters.
      */
-    public static function sanitize($string, $force_lowercase = false, $removeAlphaNumeric = false) {
+    public static function sanitize($string, $force_lowercase = false, $removeNonAlphaNumeric = false) {
 //        $strip = array("~", "`", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "=", "+", "[", "{", "]",
 //            "}", "\\", "|", ";", ":", "\"", "'", "&#8216;", "&#8217;", "&#8220;", "&#8221;", "&#8211;", "&#8212;",
 //            "â€”", "â€“", ",", "<", ">", "?"); //"/", "_", ".",
@@ -103,7 +149,7 @@ class Helpers
         $strip = array("^", "*", "\\", "|", ":", "\"", '"', "<", ">", "?"); //"/", "_", ".",
         $clean = trim(str_replace($strip, "", strip_tags($string)));
 //        $clean = preg_replace('/\s+/', "-", $clean);
-        $clean = ($removeAlphaNumeric) ? preg_replace("/[^a-zA-Z0-9]/", "", $clean) : $clean ;
+        $clean = ($removeNonAlphaNumeric) ? preg_replace("/[^a-zA-Z0-9]/", "", $clean) : $clean ;
         return ($force_lowercase) ?
             (function_exists('mb_strtolower')) ?
                 mb_strtolower($clean, 'UTF-8') :
