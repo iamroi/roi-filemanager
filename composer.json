@@ -3,16 +3,17 @@
     "type": "package",
     "description": "Framework agnostic file manager for PHP.",
     "keywords": [
+        "php file manager",
         "file manager",
         "media manger"
     ],
-    "homepage": "http://iamrja.com/roi-file-manager",
+    "homepage": "http://iamraja.com/roi-file-manager",
     "license": "MIT",
     "authors": [
         {
             "name": "Raja Munisamy",
             "email": "mrajasays@gmail.com",
-            "homepage": "http://iamrja.com"
+            "homepage": "http://iamraja.com"
         }
     ],
     "require": {
