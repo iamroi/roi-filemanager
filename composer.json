@@ -1,6 +1,6 @@
 {
     "name": "iamroi/roi-filemanager",
-    "type": "project",
+    "type": "package",
     "description": "Framework agnostic file manager for PHP.",
     "keywords": [
         "file manager",

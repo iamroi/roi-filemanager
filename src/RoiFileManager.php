@@ -344,7 +344,7 @@ class RoiFileManager
 
         $this->pdoPathAdapter->setPaginationLimit($limit);
 
-//        $pdoAdapter = new \Zdule\Flysystem\Pdo\PdoPathAdapter($this->pdo, $this->config->get('fileManagerRoot'));
+//        $pdoAdapter = new \MailTinker\Flysystem\Pdo\PdoPathAdapter($this->pdo, $this->config->get('fileManagerRoot'));
         $filesystem = new \League\Flysystem\Filesystem($this->pdoPathAdapter);
 
         try {
