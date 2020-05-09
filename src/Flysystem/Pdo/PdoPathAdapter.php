@@ -2,7 +2,7 @@
 
 // //https://github.com/phlib/flysystem-pdo/blob/master/src/PdoAdapter.php
 
-namespace Iamroi\Flysystem\Pdo;
+namespace Iamroi\RoiFileManager\Flysystem\Pdo;
 
 use League\Flysystem\AdapterInterface;
 use League\Flysystem\Adapter\AbstractAdapter;

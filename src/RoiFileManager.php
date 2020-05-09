@@ -3,7 +3,7 @@
 namespace Iamroi\RoiFileManager;
 
 //use Rakit\Validation\Rules\UploadedFile;
-use Iamroi\Flysystem\Pdo\PdoPathAdapter as PdoPathAdapter;
+use Iamroi\RoiFileManager\Flysystem\Pdo\PdoPathAdapter as PdoPathAdapter;
 use Iamroi\RoiFileManager\RoiImage;
 use League\Flysystem\Adapter\Local as LocalAdapter;
 use League\Flysystem\FileNotFoundException;

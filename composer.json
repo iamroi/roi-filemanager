@@ -27,21 +27,23 @@
         "phpunit/phpunit": "^7.0"
     },
     "config": {
-        "optimize-autoloader": true,
-        "preferred-install": "dist",
         "sort-packages": true
     },
     "extra": {
-
+      "laravel": {
+        "providers": [
+          "Iamroi\\RoiFileManager\\RoiFileManagerServiceProvider"
+        ]
+      }
     },
     "autoload": {
         "psr-4": {
-            "Iamroi\\FileManager\\": "src/"
+            "Iamroi\\RoiFileManager\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Iamroi\\FileManager\\Tests\\": "tests/"
+            "Iamroi\\RoiFileManager\\Tests\\": "tests/"
         }
     },
     "minimum-stability": "dev",
