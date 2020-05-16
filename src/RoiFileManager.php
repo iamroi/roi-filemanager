@@ -58,6 +58,10 @@ class RoiFileManager
      */
     public function __construct($config = null)
     {
+//        echo json_encode($config);
+//        return;
+//        exit;
+
         $config = is_array($config) ? new Config($config) : $config;
         $config = $config === null ? new Config : $config;
 
@@ -67,6 +71,8 @@ class RoiFileManager
             'createThumb' => true,
             'thumbWidth' => 200,
             'thumbHeight' => 200,
+
+            'port' => 3306,
 //            'constraintImageWidth' => 1200,
 //            'constraintImageHeight' => 628,
 //            'constraintImageWidth' => 1000,
@@ -85,7 +91,7 @@ class RoiFileManager
             );
         }
 
-        $this->pdo = new \PDO('mysql:host='.$this->config->get('host').';dbname='.$this->config->get('database'), $this->config->get('username'), $this->config->get('password'));
+        $this->pdo = new \PDO('mysql:host='.$this->config->get('host').';port='.$this->config->get('port').';dbname='.$this->config->get('database'), $this->config->get('username'), $this->config->get('password'));
 
 //        $this->publicRoot = $this->config->get('publicRoot'); //storage_path('app/public');
 
